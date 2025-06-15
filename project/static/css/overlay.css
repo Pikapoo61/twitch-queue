@@ -1,0 +1,108 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
+
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: transparent; /* For OBS */
+    color: #ffffff; /* White text */
+    margin: 0;
+    padding: 20px;
+    overflow: hidden; /* Hide scrollbars */
+}
+
+/* Container for the entire queue display */
+.container {
+    background-color: rgba(26, 26, 26, 0.9); /* Opaque black background */
+    border: 2px solid #e53e3e; /* Red border */
+    border-radius: 10px;
+    padding: 15px;
+    max-width: 600px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+}
+
+/* Header with logo and title */
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #4a4a4a; /* Dark gray line */
+    margin-bottom: 10px;
+}
+
+.logo {
+    width: 60px;
+    height: auto;
+    margin-right: 15px;
+}
+
+.header h2 {
+    font-size: 2.5em;
+    font-weight: bold;
+    color: #e53e3e; /* Red title */
+    text-transform: uppercase;
+    margin: 0;
+    text-shadow: 1px 1px 3px rgba(0,0,0,0.7);
+}
+
+/* Table styling */
+#order-queue {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+#order-queue th, #order-queue td {
+    padding: 10px 12px;
+    text-align: left;
+    vertical-align: middle;
+}
+
+#order-queue thead tr {
+    background-color: #e53e3e; /* Red header background */
+    color: #ffffff;
+    font-size: 1.1em;
+    text-transform: uppercase;
+}
+
+#order-queue tbody tr {
+    border-bottom: 1px solid #4a4a4a; /* Dark gray separator */
+    transition: background-color 0.3s;
+}
+
+#order-queue tbody tr:last-child {
+    border-bottom: none;
+}
+
+#order-queue tbody tr:nth-child(even) {
+    background-color: rgba(45, 45, 45, 0.5); /* Slightly lighter gray for even rows */
+}
+
+/* Column-specific styling */
+.order-id {
+    width: 25%; /* Increased width */
+    font-weight: bold;
+    color: #e53e3e; /* Red to make it stand out */
+}
+
+#order-queue .customer {
+    width: 30%; /* Adjusted width */
+}
+
+.products {
+    width: 45%; /* Adjusted width */
+}
+
+.products ul {
+    list-style: disc inside; /* Use bullets and keep them inside */
+    padding: 0;
+    margin: 0;
+}
+
+.products li {
+    padding: 2px 0;
+}
+
+/* Example of a highlighted product line from your screenshot */
+.products .highlight {
+    color: #4CAF50; /* Green color */
+    font-weight: bold;
+} 

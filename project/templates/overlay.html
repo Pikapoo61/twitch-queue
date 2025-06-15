@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Queue Overlay</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/overlay.css') }}">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo" class="logo">
+            <h2>WACHTRIJ</h2>
+        </div>
+        <table id="order-queue">
+            <tbody>
+                <!-- Orders will be injected here by JavaScript -->
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const tbody = document.querySelector('#order-queue tbody');
+            let previousOrderCount = 0; // Keep track of the number of orders
+
+            // Function to play the notification sound
+            function playNotificationSound() {
+                // Use a cache-busting query parameter to ensure the sound plays reliably
+                const audio = new Audio("{{ url_for('static', filename='sound.mp3') }}?t=" + new Date().getTime());
+                const playPromise = audio.play();
+
+                if (playPromise !== undefined) {
+                    playPromise.catch(error => {
+                        console.error("Audio play failed. In OBS, right-click the source -> Properties -> check 'Control audio via OBS'.", error);
+                    });
+                }
+            }
+
+            function fetchOrders() {
+                fetch('/api/orders')
+                    .then(response => response.json())
+                    .then(orders => {
+                        // If the number of orders has increased, play a sound
+                        if (orders.length > previousOrderCount) {
+                            playNotificationSound();
+                        }
+                        previousOrderCount = orders.length; // Update the count for the next check
+
+                        // Clear existing table rows
+                        tbody.innerHTML = '';
+                        
+                        // Add each order to the table
+                        orders.forEach(order => {
+                            const productsHtml = `<ul>${order.products.map(p => `<li>${p}</li>`).join('')}</ul>`;
+                            const row = `
+                                <tr>
+                                    <td class="order-id">#${order.id}</td>
+                                    <td class="customer">
+                                        <span>${order.customer_name}</span>
+                                    </td>
+                                    <td class="products">${productsHtml}</td>
+                                </tr>
+                            `;
+                            tbody.innerHTML += row;
+                        });
+                    })
+                    .catch(error => console.error("Error fetching or processing orders:", error));
+            }
+
+            // Fetch orders every 2 seconds for faster notifications
+            setInterval(fetchOrders, 2000);
+
+            // Initial fetch
+            fetchOrders();
+        });
+    </script>
+</body>
+</html> 

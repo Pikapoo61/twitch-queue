@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Control Panel</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #111827; /* Dark gray-blue background */
+            color: #d1d5db;
+        }
+        .header {
+            background-color: #1f2937; /* Lighter gray-blue for header */
+            border-bottom: 2px solid #dc2626; /* Red accent line */
+        }
+        .btn-next {
+            background-color: #dc2626; /* Red button */
+            transition: background-color 0.3s;
+        }
+        .btn-next:hover {
+            background-color: #b91c1c; /* Darker red on hover */
+        }
+        .table-header {
+            background-color: #374151; /* Gray for table header */
+        }
+    </style>
+</head>
+<body class="p-4 sm:p-6 md:p-8">
+    <div class="max-w-7xl mx-auto">
+        <!-- Header -->
+        <div class="header flex flex-wrap items-center justify-between p-4 rounded-t-lg shadow-lg">
+            <div class="flex items-center space-x-4 mb-4 md:mb-0">
+                <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo" class="h-12 w-auto">
+                <h1 class="text-2xl md:text-3xl font-bold text-white">Order Queue</h1>
+            </div>
+            <button id="next-order-btn" class="btn-next text-white font-bold py-2 px-6 rounded-lg shadow-md">
+                Next Order
+            </button>
+        </div>
+
+        <!-- Instructions and Overlay URL -->
+        <div class="bg-gray-800 p-4 rounded-lg shadow-lg my-4">
+            <h2 class="text-xl font-bold text-white mb-2">Hoe te gebruiken:</h2>
+            <p class="text-gray-400">Plak de onderstaande URL in een "Browser Source" in OBS (of je streaming software) om de wachtrij op je stream te tonen.</p>
+            <div class="mt-2 flex items-center bg-gray-900 rounded p-2">
+                <input type="text" id="overlay-url" value="{{ url_for('overlay', _external=True) }}" readonly class="bg-transparent text-gray-300 w-full p-1 focus:outline-none">
+                <button id="copy-url-btn" class="ml-2 bg-blue-600 hover:bg-blue-700 text-white font-bold py-1 px-3 rounded">Kopieer</button>
+            </div>
+        </div>
+
+        <!-- Order Table -->
+        <div class="overflow-x-auto bg-gray-800 rounded-b-lg shadow-lg">
+            <table class="min-w-full text-left">
+                <thead class="table-header text-gray-200 uppercase tracking-wider text-sm">
+                    <tr>
+                        <th class="p-3 w-1/12">#</th>
+                        <th class="p-3 w-2/12">Order ID</th>
+                        <th class="p-3 w-3/12">Username</th>
+                        <th class="p-3 w-5/12">Products</th>
+                        <th class="p-3 w-1/12 text-center">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="order-list" class="text-gray-300">
+                    <!-- Orders will be dynamically inserted here -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const orderList = document.getElementById('order-list');
+            const nextOrderBtn = document.getElementById('next-order-btn');
+            const overlayUrlInput = document.getElementById('overlay-url');
+            const copyUrlBtn = document.getElementById('copy-url-btn');
+
+            copyUrlBtn.addEventListener('click', function() {
+                overlayUrlInput.select();
+                document.execCommand('copy');
+                copyUrlBtn.textContent = 'Gekopieerd!';
+                setTimeout(() => {
+                    copyUrlBtn.textContent = 'Kopieer';
+                }, 2000);
+            });
+
+            function fetchOrders() {
+                fetch('/api/orders')
+                    .then(response => response.json())
+                    .then(orders => {
+                        orderList.innerHTML = ''; // Clear existing orders
+                        if (orders.length === 0) {
+                            orderList.innerHTML = '<tr><td colspan="4" class="text-center p-6 text-gray-500">The queue is empty.</td></tr>';
+                        } else {
+                            orders.forEach((order, index) => {
+                                const productsHtml = `<ul class="list-disc list-inside">${order.products.map(p => `<li>${p}</li>`).join('')}</ul>`;
+                                const row = `
+                                    <tr class="border-t border-gray-700 hover:bg-gray-700 transition-colors">
+                                        <td class="p-3 font-bold text-red-400">${index + 1}</td>
+                                        <td class="p-3 font-mono">#${order.id}</td>
+                                        <td class="p-3">${order.customer_name}</td>
+                                        <td class="p-3">${productsHtml}</td>
+                                        <td class="p-3 text-center">
+                                            <button class="delete-btn text-gray-400 hover:text-red-500" data-id="${order.id}" title="Delete Order">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                </svg>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                `;
+                                orderList.innerHTML += row;
+                            });
+                        }
+                    });
+            }
+
+            nextOrderBtn.addEventListener('click', function() {
+                fetch('/api/next-order', { method: 'POST' })
+                    .then(() => fetchOrders());
+            });
+
+            // Handle clicks on delete buttons
+            orderList.addEventListener('click', function(event) {
+                const deleteBtn = event.target.closest('.delete-btn');
+                if (deleteBtn) {
+                    const orderId = deleteBtn.dataset.id;
+                    if (confirm(`Are you sure you want to delete order ${orderId}?`)) {
+                        fetch(`/api/delete-order/${orderId}`, { method: 'DELETE' })
+                            .then(response => {
+                                if (!response.ok) throw new Error('Failed to delete order.');
+                                return response.json();
+                            })
+                            .then(() => fetchOrders())
+                            .catch(error => {
+                                console.error('Error:', error);
+                                alert('Could not delete the order.');
+                            });
+                    }
+                }
+            });
+
+            // Initial fetch and then poll every 5 seconds
+            fetchOrders();
+            setInterval(fetchOrders, 5000);
+        });
+    </script>
+</body>
+</html> 

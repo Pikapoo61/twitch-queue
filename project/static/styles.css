@@ -1,0 +1,71 @@
+body {
+    background-color: transparent;
+    font-family: 'Arial', sans-serif;
+    color: #ffffff;
+    overflow: hidden;
+    margin: 0;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+#alert-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background-color: rgba(0, 0, 0, 0.7);
+    border-radius: 10px;
+    border: 2px solid #4a90e2;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+    text-align: center;
+    max-width: 600px;
+    margin: auto;
+}
+
+#logo {
+    max-width: 100px;
+    margin-bottom: 15px;
+}
+
+#order-text {
+    font-size: 24px;
+    font-weight: bold;
+    margin: 0;
+}
+
+/* Animations */
+.hidden {
+    display: none;
+    opacity: 0;
+}
+
+.fade-in {
+    animation: fadeIn 1s ease-in-out forwards;
+}
+
+.fade-out {
+    animation: fadeOut 1s ease-in-out forwards;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+} 
