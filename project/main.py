@@ -14,6 +14,7 @@ queue_lock = threading.Lock()
 def webhook():
     if request.is_json:
         data = request.get_json()
+        print(f"INCOMING SHOPIFY DATA: {data}")
 
         # Check if the order contains at least one product with the 'livestream' tag
         line_items = data.get('line_items') or []
@@ -45,6 +46,11 @@ def webhook():
             if attr.get('name', '').lower() == 'tiktok/twitch account':
                 customer_name = attr.get('value', '').strip()
                 break
+
+        # If not found, try the shipping address company name
+        if not customer_name:
+            shipping_address = data.get('shipping_address') or {}
+            customer_name = (shipping_address.get('company') or '').strip()
 
         # If not found in note attributes, try the general order note
         if not customer_name:
