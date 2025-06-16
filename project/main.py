@@ -16,28 +16,15 @@ def webhook():
     if request.is_json:
         data = request.get_json()
 
-        # Check if the order contains at least one product with the 'livestream' tag
+        # All orders are now processed, so we just get the line items
+        # and no longer filter for "live stream".
         line_items = data.get('line_items') or []
-        is_livestream_order = False
-        for item in line_items:
-            # Note: Shopify's default order webhook doesn't include product tags.
-            # This logic assumes you've used an app or customization to add tags to the line item properties.
-            # A more common approach is to check product 'type' or 'vendor'.
-            # For now, we'll revert to checking the title as a reliable default.
-            item_name = item.get('name') or ''
-            if 'live stream' in item_name.lower():
-                is_livestream_order = True
-                break
 
         # Safely get the order number
         raw_order_id = data.get('order_number')
         if not raw_order_id:
             raw_order_id = f"{str(int(time.time()))[-5:]}"
         order_id = str(raw_order_id).lstrip('#')
-
-        if not is_livestream_order:
-            print(f"Order #{order_id} received, but is not a live stream item. Skipping.")
-            return jsonify({"status": "success", "message": "Order skipped"}), 200
 
         # Try to get customer name from note attributes (e.g., "Tiktok/Twitch account")
         customer_name = ''
