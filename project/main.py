@@ -42,7 +42,7 @@ def webhook():
         customer_name = ''
         note_attributes = data.get('note_attributes', [])
         for attr in note_attributes:
-            if attr.get('name') == 'Tiktok/Twitch account':
+            if attr.get('name', '').lower() == 'tiktok/twitch account':
                 customer_name = attr.get('value', '').strip()
                 break
 
