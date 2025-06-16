@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, jsonify
 from collections import deque
 import threading
 import time
+import re
 
 app = Flask(__name__)
 
@@ -14,7 +15,6 @@ queue_lock = threading.Lock()
 def webhook():
     if request.is_json:
         data = request.get_json()
-        print(f"INCOMING SHOPIFY DATA: {data}")
 
         # Check if the order contains at least one product with the 'livestream' tag
         line_items = data.get('line_items') or []
@@ -68,7 +68,13 @@ def webhook():
         products = []
         for item in line_items:
             product_name = item.get('name') or 'Unknown Product'
-            products.append(f"{item.get('quantity')}x {product_name}")
+            # Clean the product name for display
+            # First, remove "live stream" case-insensitively
+            display_name = re.sub(r'live stream', '', product_name, flags=re.IGNORECASE)
+            # Then, remove any trailing stuff like " - " or "(test product)" if it's there
+            display_name = re.sub(r'\s*\(test product\)', '', display_name, flags=re.IGNORECASE)
+            display_name = re.sub(r'\s*-\s*$', '', display_name).strip()
+            products.append(f"{item.get('quantity')}x {display_name}")
 
         with queue_lock:
             # Add the new order to the queue
