@@ -48,7 +48,7 @@ def webhook():
 
         # If not found in note attributes, try the general order note
         if not customer_name:
-            customer_name = data.get('note', '').strip()
+            customer_name = (data.get('note') or '').strip()
 
         # If still no name, fall back to the customer's first name
         if not customer_name:
