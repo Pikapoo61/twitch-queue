@@ -90,7 +90,7 @@
                     .then(orders => {
                         orderList.innerHTML = ''; // Clear existing orders
                         if (orders.length === 0) {
-                            orderList.innerHTML = '<tr><td colspan="4" class="text-center p-6 text-gray-500">The queue is empty.</td></tr>';
+                            orderList.innerHTML = '<tr><td colspan="5" class="text-center p-6 text-gray-500">The queue is empty.</td></tr>';
                         } else {
                             orders.forEach((order, index) => {
                                 const productsHtml = `<ul class="list-disc list-inside">${order.products.map(p => `<li>${p}</li>`).join('')}</ul>`;

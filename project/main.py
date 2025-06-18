@@ -16,6 +16,18 @@ def webhook():
     if request.is_json:
         data = request.get_json()
 
+        # Check shipping method first. If it's sealed, we don't need to process it further.
+        shipping_lines = data.get('shipping_lines', [])
+        if shipping_lines:
+            shipping_method_title = shipping_lines[0].get('title', '')
+            if 'sealed' in shipping_method_title.lower():
+                order_id_info = data.get('order_number', 'N/A')
+                print(f"Order #{order_id_info} is sealed and will not be added to the queue.")
+                return jsonify({
+                    "status": "success", 
+                    "message": "Order with sealed shipping ignored."
+                }), 200
+
         # All orders are now processed, so we just get the line items
         # and no longer filter for "live stream".
         line_items = data.get('line_items') or []
