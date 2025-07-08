@@ -54,6 +54,7 @@ body {
     padding: 10px 12px;
     text-align: left;
     vertical-align: middle;
+    font-size: 1.25em;
 }
 
 #order-queue thead tr {
